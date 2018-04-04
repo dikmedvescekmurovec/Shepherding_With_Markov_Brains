@@ -27,4 +27,5 @@ Teach a dog how to shepherd using Markov Brains.
 **Sheep Spawn**
 * Static: The starting position is the same for each iteration
 * Random: The starting position of the sheep is randomized each iteration
+
 **Sheep Grazing**: Whether or not the sheep will move without the presence of the shepherd nearby
