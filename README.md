@@ -8,8 +8,8 @@ Teach a dog how to shepherd using Markov Brains.
 ### Shepherd
 **SightType**
 * Normal: Return a set of 0s and 1s determining whether a sheep is or isn't located in each of the sight segment
-* Distance: Return a set of floats determening the distance of the closest sheep in each of the sight segments
-* Furthest only: Return a set of 0s and one float determining the segment in which the sheep located furthest from the centroid is and how far away is it
+* Distance: Return a set of floats determening the distance of the closest sheep in each of the sight segments *(Not taken into account by the logic gates yet)*
+* Furthest only: Return a set of 0s and one float determining the segment in which the sheep located furthest from the centroid is and how far away is it *(Not taken into account by the logic gates yet)*
 
 **Logic Type**
 * Probabilistic: Output of the logic gates used within the Markov Brain will be based on probability. 
