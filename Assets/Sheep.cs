@@ -152,6 +152,7 @@ public class Sheep : MonoBehaviour {
         {
             if (simPosition.z < barnVertices[0].z && simPosition.z > barnVertices[1].z)
             {
+                simulation.totalSheepBarned++;
                 return true;
             }
         }
@@ -175,7 +176,7 @@ public class Sheep : MonoBehaviour {
     // Use this for initialization
     void Awake () {
         numberOfNearestNeighbours = allSheep.Length;
-        simulation = GameObject.Find("Game Manager").GetComponent<Simulation>();
+        simulation = GameObject.Find("Simulation").GetComponent<Simulation>();
         shepherd = GameObject.Find("Shepherd").GetComponent<Shepherd>();
         simulating = simulation.simulatingAnimation;
         sheepGrazing = simulation.sheepGrazing;

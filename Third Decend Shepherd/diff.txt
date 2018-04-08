@@ -1,0 +1,21 @@
+No. Sheep = 20
+No. Steps = 2000
+No. Specimens = 100
+No. Randoms = 3
+No. Elitists = 3
+
+Sheep spawn = static
+Sheep grazing = false
+
+Sight type = normal/15° angle
+Logic type = probabilistic
+Movement Type = Analog/15° turn
+
+What was changed:
+Shepherds for reproduction selected proportional to their fitness value
+
+Fitness function adapted so that we don't get division by 0
+If total movement = 0 
+    1
+Else
+    2 + ((sheepInitial - sheepLeft)*50 + (SheepDistanceFromBarn() - initialDistanceFromBarn) + ShepherdDistanceFromSheep())/TotalShepherdMovement();

@@ -50,7 +50,7 @@ public class Simulation : MonoBehaviour {
 
     private string fileName = "DNA";
     private string fileType = ".txt";
-    private string bestDogFile = "BestBestDOG";
+    private string bestDogFile = "BestDOG";
     private string fitnessLogFile = "fitProgress";
     float bestDogFitness = -100;
 
@@ -84,6 +84,11 @@ public class Simulation : MonoBehaviour {
         }
         else if (!firstSpawn)
         {
+            foreach (GameObject go in GameObject.FindGameObjectsWithTag("Sheep"))
+            {
+                go.GetComponent<SpriteRenderer>().enabled = true;
+                go.GetComponent<Sheep>().collected = false;
+            }
             for (int i = 0; i < sheepInitial; i++)
             {
                 sheep[i].simPosition = initialSheepLocations[i];
@@ -139,7 +144,7 @@ public class Simulation : MonoBehaviour {
 
         string s = new StreamReader("BestDOG.txt").ReadLine().ToString();
         shepherd.Reset(new MarkovDNA(s));
-        for (int j = 0; j < stepsInitial; j++)
+        for (int j = 0; j < 200000; j++)
         {
             for (int k = 0; k < sheep.Length; k++)
             {
@@ -152,6 +157,18 @@ public class Simulation : MonoBehaviour {
         }
     }
 
+    float initialDistanceFromBarn = 0;
+    public float totalSheepBarned = 0;
+
+    float VectorSum(float[] vec)
+    {
+        float sum = 0;
+        for (int i = 0; i < vec.Length; i++)
+        {
+            sum += vec[i];
+        }
+        return sum;
+    }
     // See simulation in runtime
     IEnumerator SimulateStepByStep(int noSimulations)
     {
@@ -161,6 +178,7 @@ public class Simulation : MonoBehaviour {
 
         for (int s = 0; s < noSimulations; s++)
         {
+            totalSheepBarned = 0;
             for (int i = 0; i < noSpecimens; i++)
             {
                 //Initialize 
@@ -168,6 +186,8 @@ public class Simulation : MonoBehaviour {
                 stepsLeft = stepsInitial;
                 SpawnSheep();
                 SetSheepNeighbours();
+                
+                initialDistanceFromBarn = SheepDistanceFromBarn();
                 // Random shepherds for the first iteration
                 if(s == 0)
                 {
@@ -193,17 +213,11 @@ public class Simulation : MonoBehaviour {
                     float random2 = Random.Range(0f, 1f);
                     int index1 = -1;
                     int index2 = -1;
-                    float[] lottery = new float[previousSpecimenFitness.Length];
-
+                    float fitnessSum = VectorSum(previousSpecimenFitness);
                     //The best shepherd has the highest chance of reproducing
-                    for(int j = 0; j < lottery.Length; j++)
+                    for (int j = 0; j < previousSpecimenFitness.Length; j++)
                     {
-                        lottery[j] = j;
-                    }
-                    for (int j = 0; j < lottery.Length; j++)
-                    {
-                        cummulativeProbability += lottery[j] / ((lottery.Length-1)*((lottery.Length))/2);
-                        //print(cummulativeProbability);
+                        cummulativeProbability += previousSpecimenFitness[j] / fitnessSum;
                         if (index1 == -1 && random1 < cummulativeProbability)
                         {
                             index1 = j;
@@ -250,12 +264,12 @@ public class Simulation : MonoBehaviour {
             //printWithTime("Sorted");
             
             //Save best dog
-            if (specimenFitness[0] > bestDogFitness)
+            if (specimenFitness.Last() > bestDogFitness)
             {
-                bestDogFitness = specimenFitness[0];
+                bestDogFitness = specimenFitness.Last();
                 using (StreamWriter dogWriter = new StreamWriter(bestDogFile + fileType))
                 {
-                    dogWriter.Write(ArrayToString(specimens[specimens.Length - 1].strand));
+                    dogWriter.Write(ArrayToString(specimens.Last().strand));
                 }
             }
             //Save the fitness value of the average dog
@@ -267,9 +281,11 @@ public class Simulation : MonoBehaviour {
             }
             fitAvg /= specimenFitness.Length;
 
-            print(fitAvg);
+            print("Average fitness: " + fitAvg);
+            print("Average gene difference: " + AverageDifferenceInGenes());
+            print("Average sheep barned: " + (totalSheepBarned)/noSpecimens + " out of " + sheepInitial);
             fitnessLogger.Write(fitAvg + "\n");
-            bestFitnessLogger.Write(specimenFitness[0] + "\n");
+            bestFitnessLogger.Write((totalSheepBarned) / noSpecimens + "\n");
 
             // Switch to a new file every 100 generations
             if (s > 0 && s % 100 == 0)
@@ -277,7 +293,7 @@ public class Simulation : MonoBehaviour {
                 fitnessLogger.Close();
                 fitnessLogger = new StreamWriter(fitnessLogFile + s + fileType);
                 bestFitnessLogger.Close();
-                bestFitnessLogger = new StreamWriter("bestFitness" + s + fileType);
+                bestFitnessLogger = new StreamWriter("averageSheep" + s + fileType);
             }
             specimenFitness.CopyTo(previousSpecimenFitness, 0);
             specimens.CopyTo(previousSpecimens, 0);
@@ -290,12 +306,11 @@ public class Simulation : MonoBehaviour {
     float FitnessFunction()
     {
         if (shepherd.totalMovement == 0)
-        {
-            //print("zero");
-            return 0;
+        { 
+            return 1;
         }
 
-        return (sheepInitial - sheepLeft)*50 + SheepDistanceFromBarn() + ShepherdDistanceFromSheep();// + SheepGrouping(); // + ShepherdDistanceFromSheep() + stepsLeft;
+        return 2 + ((sheepInitial - sheepLeft)*50 + (SheepDistanceFromBarn() - initialDistanceFromBarn) + ShepherdDistanceFromSheep())/TotalShepherdMovement();// + SheepGrouping(); // + ShepherdDistanceFromSheep() + stepsLeft;
     }
     
     // Return the max distance between any two sheep
@@ -324,7 +339,7 @@ public class Simulation : MonoBehaviour {
         return Mathf.Max(0, 50 - maxDistance);
     }
 
-    // Shepherd's distance from the average sheep 
+    // Shepherd's distance from the average sheep
     float ShepherdDistanceFromSheep()
     {
         float avgDistance = 0;
@@ -340,10 +355,14 @@ public class Simulation : MonoBehaviour {
             }
         }
         return Mathf.Max(0, 50 - avgDistance / sheepLeft);
-        
     }
 
-    // Returns a penalty for how far the average sheep was from the barn
+    float TotalShepherdMovement()
+    {
+        return 1 + shepherd.totalMovement/stepsInitial;
+    }
+    // Returns a number for how far the average sheep was from the barn
+    // Closer -> bigger number
     float SheepDistanceFromBarn()
     {
         float totalDistance = 0;
@@ -390,5 +409,18 @@ public class Simulation : MonoBehaviour {
             toPrint += item + ",";
         }
         return toPrint;
+    }
+
+    float AverageDifferenceInGenes()
+    {
+        float avgDif = 0;
+        for (int i = 0; i < specimens.Length; i++)
+        {
+            for(int j = 0; j < specimens.Length; j++)
+            {
+                avgDif += specimens[i].difference(specimens[j]);
+            }
+        }
+        return avgDif/specimens.Length/specimens.Length;
     }
 }

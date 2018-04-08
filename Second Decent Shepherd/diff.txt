@@ -1,0 +1,15 @@
+No. Sheep = 20
+No. Steps = 1000
+No. Specimens = 50
+No. Randoms = 2
+No. Elitists = 2
+
+Sheep spawn = static
+Sheep grazing = false
+
+Sight type = normal/15° angle
+Logic type = probabilistic
+Movement Type = Analog/15° turn
+
+What was changed:
+Shepherd now simply turns without moving forward.

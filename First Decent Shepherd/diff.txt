@@ -1,0 +1,23 @@
+No. Sheep = 20
+No. Steps = 1000
+No. Specimens = 50
+No. Randoms = 2
+No. Elitists = 2
+
+Sheep spawn = static
+Sheep grazing = false
+
+Sight type = normal/15° angle
+Logic type = probabilistic
+Movement Type = Analog/15° turn
+
+What was changed:
+Fitness function
+
+If total movement = 0 
+    0
+Else
+    1 + ((sheepInitial - sheepLeft)*50 + (SheepDistanceFromBarn() - initialDistanceFromBarn) + ShepherdDistanceFromSheep())/TotalShepherdMovement();
+
+All functions in fitness function return from 0 to 50. So that even one sheep barned is better or equal to anything the other functions can produce
+TotalShepherdMovement returns a value between 1 and 2. 1 means no movement at all. 2 is maximum movement possible in the given time.

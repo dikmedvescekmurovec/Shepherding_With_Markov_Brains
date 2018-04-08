@@ -102,4 +102,14 @@ public class MarkovDNA {
         }
         return true;
     }
+
+    public float difference(MarkovDNA otherDNA)
+    {
+        float diff = 0;
+        for(int i = 0; i < Length; i++)
+        {
+            diff += Mathf.Abs(strand[i] - otherDNA.strand[i]);
+        }
+        return diff / Length;
+    }
 }

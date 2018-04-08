@@ -125,7 +125,7 @@ public class Shepherd : MonoBehaviour {
 
         // Move the shepherd
         int movementIndex = markovMovementOutput[0] + 2 * markovMovementOutput[1];
-        float speed = shepherdSpeed;
+        float speed = 0;
         switch (movementIndex)
         { 
             //Stop
@@ -135,7 +135,7 @@ public class Shepherd : MonoBehaviour {
                     speed = 0;
                 } else
                 {
-                    rotation = 0;
+                    speed = 0;
                 }
                 break;
             //Forward
@@ -146,7 +146,7 @@ public class Shepherd : MonoBehaviour {
                 }
                 else
                 {
-                    rotation = 90;
+                    speed = shepherdSpeed;
                 }
                 break;
             //Turn right
@@ -157,7 +157,7 @@ public class Shepherd : MonoBehaviour {
                 }
                 else
                 {
-                    rotation = 180;
+                    rotation += 90;
                 }
                 break;
             //Turn left
@@ -168,7 +168,7 @@ public class Shepherd : MonoBehaviour {
                 }
                 else
                 {
-                    rotation = 270;
+                    rotation -= 90;
                 }
                 break;
         }
@@ -181,7 +181,7 @@ public class Shepherd : MonoBehaviour {
 
     // Set up environment and first shepherd
     void Awake () {
-        simulation = GameObject.Find("Game Manager").GetComponent<Simulation>();
+        simulation = GameObject.Find("Simulation").GetComponent<Simulation>();
         simulating = simulation.simulatingAnimation;
         barn = GameObject.Find("Barn");
         sight = GetSight(sightType);
@@ -192,6 +192,7 @@ public class Shepherd : MonoBehaviour {
 
         for (int i = 0; i < dna.strand.Length - 1; i++)
         {
+
             byte[] readCodons = { dna.strand[i], dna.strand[i + 1] };
             if (dna.EqualsStartCodon(readCodons))
             {
